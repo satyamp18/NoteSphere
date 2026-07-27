@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load notes_extras %}
+{% block title %}Dashboard - NoteSphere{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Hello, {{ user.first_name|default:user.username }} 👋</h2>
+        <p class="text-muted mb-0">Here's your smart overview and quick management dashboard.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'notes_app:note_create' %}" class="btn btn-primary rounded-pill px-3 fw-bold">
+            <i class="fa-solid fa-plus me-1"></i> New Note
+        </a>
+        <a href="{% url 'notes_app:document_upload' %}" class="btn btn-outline-primary rounded-pill px-3 fw-bold">
+            <i class="fa-solid fa-cloud-arrow-up me-1"></i> Upload File
+        </a>
+    </div>
+</div>
+
+<!-- Metrics Overview Row -->
+<div class="row g-3 mb-4">
+    <!-- Total Notes Card -->
+    <div class="col-12 col-sm-6 col-lg-4">
+        <div class="metric-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="metric-label">Total Notes</div>
+                    <div class="metric-value">{{ total_notes }}</div>
+                </div>
+                <div class="metric-icon indigo">
+                    <i class="fa-solid fa-sticky-note"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <a href="{% url 'notes_app:note_list' %}" class="small font-weight-bold text-decoration-none">
+                    View all notes <i class="fa-solid fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Documents Card -->
+    <div class="col-12 col-sm-6 col-lg-4">
+        <div class="metric-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="metric-label">Documents</div>
+                    <div class="metric-value">{{ total_documents }}</div>
+                </div>
+                <div class="metric-icon emerald">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <a href="{% url 'notes_app:document_list' %}" class="small font-weight-bold text-decoration-none">
+                    Browse documents <i class="fa-solid fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Storage Summary Card -->
+    <div class="col-12 col-sm-6 col-lg-4">
+        <div class="metric-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="metric-label">Cloud Storage</div>
+                    <div class="metric-value">{{ storage_mb }} <span class="fs-6 text-muted font-weight-normal">/ {{ storage_quota_mb }} MB</span></div>
+                </div>
+                <div class="metric-icon amber">
+                    <i class="fa-solid fa-hard-drive"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-1 small text-muted">
+                    <span>Quota Used</span>
+                    <span>{{ storage_percent }}%</span>
+                </div>
+                <div class="progress progress-storage">
+                    <div class="progress-bar" role="progressbar" style="width: {{ storage_percent }}%;" aria-valuenow="{{ storage_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Dashboard Grid -->
+<div class="row g-4">
+    <!-- Recent Notes Section -->
+    <div class="col-12 col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="fa-solid fa-clock-rotate-left text-primary me-2"></i> Recent Notes</h5>
+                <a href="{% url 'notes_app:note_list' %}" class="small fw-semibold text-decoration-none">View All</a>
+            </div>
+
+            {% if recent_notes %}
+                <div class="row g-3">
+                    {% for note in recent_notes %}
+                        <div class="col-12 col-sm-6">
+                            <div class="note-card color-{{ note.color }}">
+                                {% if note.is_pinned %}
+                                    <span class="pin-badge" title="Pinned Note"><i class="fa-solid fa-thumbtack"></i></span>
+                                {% endif %}
+                                <div>
+                                    <span class="badge badge-custom {{ note.category|category_badge }} mb-2">{{ note.category }}</span>
+                                    <a href="{% url 'notes_app:note_detail' note.pk %}" class="text-decoration-none text-reset d-block">
+                                        <div class="note-title text-truncate pe-3">{{ note.title }}</div>
+                                    </a>
+                                    <div class="note-snippet">{{ note.content|default:"No content." }}</div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center pt-2 mt-2 border-top border-subtle small text-muted">
+                                    <span>{{ note.updated_at|date:"M j, Y" }}</span>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'notes_app:note_edit' note.pk %}" class="text-secondary" title="Edit"><i class="fa-solid fa-pen-to-square"></i></a>
+                                        <a href="{% url 'notes_app:note_detail' note.pk %}" class="text-primary" title="View"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state py-5">
+                    <i class="fa-solid fa-note-sticky empty-state-icon"></i>
+                    <h6 class="fw-bold">No Notes Created Yet</h6>
+                    <p class="text-muted small mb-3">Start capturing your thoughts, ideas, and tasks.</p>
+                    <a href="{% url 'notes_app:note_create' %}" class="btn btn-sm btn-primary rounded-pill px-3">Create First Note</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Uploaded Documents Section -->
+    <div class="col-12 col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="fa-solid fa-file-arrow-up text-success me-2"></i> Recent Files</h5>
+                <a href="{% url 'notes_app:document_list' %}" class="small fw-semibold text-decoration-none">View All</a>
+            </div>
+
+            {% if recent_documents %}
+                <div class="d-flex flex-column gap-3">
+                    {% for doc in recent_documents %}
+                        <div class="document-card d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3 overflow-hidden me-2">
+                                <div class="file-icon-box">
+                                    <i class="fa-solid {{ doc.file_type|file_icon }}"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <a href="{% url 'notes_app:document_detail' doc.pk %}" class="fw-semibold text-reset text-truncate d-block text-decoration-none">
+                                        {{ doc.title }}
+                                    </a>
+                                    <div class="small text-muted d-flex align-items-center gap-2">
+                                        <span class="badge badge-custom {{ doc.category|category_badge }}">{{ doc.category }}</span>
+                                        <span>• {{ doc.file_size|filesize_format }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <a href="{% url 'notes_app:document_download' doc.pk %}" class="btn btn-sm btn-light text-primary rounded-circle" title="Download">
+                                    <i class="fa-solid fa-download"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state py-5">
+                    <i class="fa-solid fa-folder-open empty-state-icon"></i>
+                    <h6 class="fw-bold">No Documents Uploaded</h6>
+                    <p class="text-muted small mb-3">Upload PDF, DOCX, or TXT documents to store safely.</p>
+                    <a href="{% url 'notes_app:document_upload' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Upload Document</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

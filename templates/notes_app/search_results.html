@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load notes_extras %}
+{% block title %}Search Results for "{{ query }}" - NoteSphere{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="fw-bold mb-1">Search Results</h2>
+    <p class="text-muted mb-0">Found <strong>{{ total_results }}</strong> result(s) matching "<strong>{{ query }}</strong>"</p>
+</div>
+
+<!-- Search Results Tabs -->
+{% if total_results > 0 %}
+    <ul class="nav nav-pills mb-4" id="searchTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active rounded-pill px-4" id="notes-tab" data-bs-toggle="tab" data-bs-target="#notes-pane" type="button" role="tab">
+                <i class="fa-solid fa-note-sticky me-2"></i> Notes ({{ notes|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill px-4" id="docs-tab" data-bs-toggle="tab" data-bs-target="#docs-pane" type="button" role="tab">
+                <i class="fa-solid fa-file me-2"></i> Documents ({{ documents|length }})
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="searchTabsContent">
+        <!-- Notes Search Results Tab -->
+        <div class="tab-pane fade show active" id="notes-pane" role="tabpanel">
+            {% if notes %}
+                <div class="row g-3">
+                    {% for note in notes %}
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="note-card color-{{ note.color }}">
+                                <div>
+                                    <span class="badge badge-custom {{ note.category|category_badge }} mb-2">{{ note.category }}</span>
+                                    <a href="{% url 'notes_app:note_detail' note.pk %}" class="text-decoration-none text-reset d-block">
+                                        <h5 class="note-title pe-4">{{ note.title }}</h5>
+                                    </a>
+                                    <div class="note-snippet">{{ note.content|default:"No content." }}</div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center pt-3 mt-3 border-top border-subtle small text-muted">
+                                    <span>Updated {{ note.updated_at|date:"M j, Y" }}</span>
+                                    <a href="{% url 'notes_app:note_detail' note.pk %}" class="text-primary" title="View"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="p-4 text-center text-muted">No matching notes found.</div>
+            {% endif %}
+        </div>
+
+        <!-- Documents Search Results Tab -->
+        <div class="tab-pane fade" id="docs-pane" role="tabpanel">
+            {% if documents %}
+                <div class="row g-3">
+                    {% for doc in documents %}
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="document-card d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3 overflow-hidden me-2">
+                                    <div class="file-icon-box">
+                                        <i class="fa-solid {{ doc.file_type|file_icon }}"></i>
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <a href="{% url 'notes_app:document_detail' doc.pk %}" class="fw-semibold text-reset text-truncate d-block text-decoration-none">
+                                            {{ doc.title }}
+                                        </a>
+                                        <div class="small text-muted">
+                                            <span class="badge badge-custom {{ doc.category|category_badge }} me-1">{{ doc.category }}</span>
+                                            <span>{{ doc.file_size|filesize_format }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <a href="{% url 'notes_app:document_download' doc.pk %}" class="btn btn-sm btn-light text-primary rounded-circle" title="Download">
+                                    <i class="fa-solid fa-download"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="p-4 text-center text-muted">No matching documents found.</div>
+            {% endif %}
+        </div>
+    </div>
+{% else %}
+    <div class="empty-state py-5">
+        <i class="fa-solid fa-magnifying-glass empty-state-icon"></i>
+        <h4 class="fw-bold">No Results Found</h4>
+        <p class="text-muted">We couldn't find any notes or documents matching "<strong>{{ query }}</strong>". Try searching for another keyword.</p>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Notes Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      body { background: linear-gradient(135deg,#667eea,#764ba2); min-height:100vh; color:#222; }
+      .card { border-radius:12px; }
+      .content-area { background:white; padding:20px; border-radius:12px; }
+    </style>
+  </head>
+  <body>
+    <div class="container py-4">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="content-area mb-3">
+            <h4>📚 Notes Manager</h4>
+            <ul class="list-unstyled">
+              <li><a href="{% url 'notes:create' %}">📝 Add Note</a></li>
+              <li><a href="{% url 'notes:draw' %}">🎨 Draw Note</a></li>
+              <li><a href="{% url 'notes:list' %}">📖 View Notes</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-9">
+          <div class="content-area">
+            {% block content %}{% endblock %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

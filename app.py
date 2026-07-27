@@ -2,8 +2,16 @@ import streamlit as st
 import json
 import os
 from datetime import datetime
+from PIL import Image
+import io
+import base64
 
 FILE = "notes.json"
+DRAWINGS_DIR = "drawings"
+
+# Create drawings directory if it doesn't exist
+if not os.path.exists(DRAWINGS_DIR):
+    os.makedirs(DRAWINGS_DIR)
 
 # Page Configuration
 st.set_page_config(
@@ -83,7 +91,7 @@ with st.sidebar:
     st.markdown("## 📚 Navigation")
     menu = st.selectbox(
         "Choose an option:",
-        ["📝 Add Note", "📖 View Notes", "🔍 Search Notes"],
+        ["📝 Add Note", "🎨 Draw Note", "📖 View Notes", "🔍 Search Notes"],
         help="Select what you'd like to do"
     )
 
@@ -154,6 +162,122 @@ if clean_menu == "Note" and "Add" in menu:
         else:
             st.error("❌ Please fill in both title and content!")
 
+# ---------------- DRAW NOTE ----------------
+
+elif clean_menu == "Note" and "Draw" in menu:
+    from streamlit_drawable_canvas import st_canvas
+    
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        st.subheader("🎨 Create a Drawing Note")
+    
+    with col2:
+        st.info(f"📊 Total Notes: {len(notes)}")
+
+    col1, col2 = st.columns([1, 1], gap="large")
+    
+    with col1:
+        title = st.text_input(
+            "📌 Drawing Title",
+            placeholder="Give your drawing a title...",
+            help="Enter a descriptive title for your drawing"
+        )
+    
+    with col2:
+        category = st.selectbox(
+            "🏷️ Category",
+            ["Personal", "Work", "Ideas", "Sketch", "Other"],
+            key="draw_category"
+        )
+
+    # Drawing canvas settings
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        stroke_width = st.slider(
+            "✏️ Pen Size",
+            1, 30, 5,
+            help="Adjust the thickness of your pen"
+        )
+    
+    with col2:
+        stroke_color = st.color_picker(
+            "🎨 Pen Color",
+            "#000000",
+            help="Choose your pen color"
+        )
+    
+    with col3:
+        bg_color = st.color_picker(
+            "📄 Background",
+            "#FFFFFF",
+            help="Choose background color"
+        )
+    
+    with col4:
+        canvas_mode = st.selectbox(
+            "🖌️ Mode",
+            ["freedraw", "line", "rect", "circle", "transform"],
+            help="Select drawing mode"
+        )
+
+    # Create canvas for drawing
+    canvas_result = st_canvas(
+        fill_color=bg_color,
+        stroke_width=stroke_width,
+        stroke_color=stroke_color,
+        background_color=bg_color,
+        height=400,
+        width=None,
+        drawing_mode=canvas_mode,
+        key="drawing_canvas",
+    )
+
+    # Display instructions
+    st.info("💡 **Tips:** Use the tools on the left to draw, erase, or undo. You can switch between different drawing modes above.")
+
+    col1, col2, col3 = st.columns([1, 1, 2])
+    
+    with col1:
+        save_drawing = st.button("💾 Save Drawing", use_container_width=True)
+    
+    with col2:
+        clear_drawing = st.button("🔄 Clear Canvas", use_container_width=True)
+
+    if clear_drawing:
+        st.rerun()
+
+    if save_drawing:
+        if title and canvas_result.image_data is not None:
+            # Convert canvas image to base64
+            img = Image.fromarray((canvas_result.image_data).astype('uint8'), 'RGBA')
+            
+            # Save image to file
+            drawing_filename = f"{DRAWINGS_DIR}/{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+            img.save(drawing_filename)
+            
+            new_note = {
+                "title": title,
+                "content": f"[Drawing saved at {drawing_filename}]",
+                "drawing_path": drawing_filename,
+                "category": category,
+                "type": "drawing",
+                "date": datetime.now().strftime("%Y-%m-%d %H:%M")
+            }
+
+            notes.append(new_note)
+            save_notes(notes)
+
+            st.success("✅ Drawing saved successfully!")
+            st.balloons()
+            st.rerun()
+
+        elif not title:
+            st.error("❌ Please enter a title for your drawing!")
+        else:
+            st.error("❌ Please draw something before saving!")
+
 # ---------------- VIEW NOTES ----------------
 
 elif clean_menu == "Notes" and "View" in menu:
@@ -193,16 +317,31 @@ elif clean_menu == "Notes" and "View" in menu:
         st.markdown("---")
 
         for i, note in enumerate(sorted_notes):
-            category_emoji = {
-                "Personal": "👤",
-                "Work": "💼",
-                "Ideas": "💡",
-                "To-Do": "✓",
-                "Other": "📌"
-            }.get(note.get("category", "Other"), "📌")
+            # Determine emoji based on type and category
+            if note.get("type") == "drawing":
+                type_emoji = "🎨"
+            else:
+                category_emoji_map = {
+                    "Personal": "👤",
+                    "Work": "💼",
+                    "Ideas": "💡",
+                    "To-Do": "✓",
+                    "Sketch": "🖌️",
+                    "Other": "📌"
+                }
+                type_emoji = category_emoji_map.get(note.get("category", "Other"), "📌")
 
-            with st.expander(f"{category_emoji} {note['title']} — {note['date']}", expanded=False):
-                st.write(note["content"])
+            with st.expander(f"{type_emoji} {note['title']} — {note['date']}", expanded=False):
+                
+                # Display drawing if it's a drawing note
+                if note.get("type") == "drawing" and os.path.exists(note.get("drawing_path", "")):
+                    try:
+                        drawing_img = Image.open(note["drawing_path"])
+                        st.image(drawing_img, use_column_width=True, caption="Your Drawing")
+                    except Exception as e:
+                        st.error(f"Could not load drawing: {e}")
+                else:
+                    st.write(note["content"])
                 
                 st.caption(f"Category: {note.get('category', 'Other')}")
 
@@ -210,13 +349,32 @@ elif clean_menu == "Notes" and "View" in menu:
 
                 # Delete
                 if col1.button("🗑️ Delete", key=f"del{i}", use_container_width=True):
+                    # Also delete drawing file if it exists
+                    if note.get("type") == "drawing" and os.path.exists(note.get("drawing_path", "")):
+                        try:
+                            os.remove(note["drawing_path"])
+                        except:
+                            pass
+                    
                     notes.pop(i)
                     save_notes(notes)
                     st.success("Note deleted!")
                     st.rerun()
 
-                # Edit
-                if col2.button("✏️ Edit", key=f"edit{i}", use_container_width=True):
+                # Download drawing
+                if note.get("type") == "drawing" and col2.button("📥 Download", key=f"download{i}", use_container_width=True):
+                    if os.path.exists(note.get("drawing_path", "")):
+                        with open(note["drawing_path"], "rb") as file:
+                            st.download_button(
+                                label="Download Drawing",
+                                data=file.read(),
+                                file_name=f"{note['title']}.png",
+                                mime="image/png",
+                                key=f"down_btn{i}"
+                            )
+
+                # Edit (only for text notes)
+                if note.get("type") != "drawing" and col2.button("✏️ Edit", key=f"edit{i}", use_container_width=True):
                     st.session_state["edit_index"] = i
                     st.session_state["edit_mode"] = True
                     st.rerun()

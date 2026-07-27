@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load notes_extras %}
+{% block title %}All Notes - NoteSphere{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">My Notes</h2>
+        <p class="text-muted mb-0">Organize thoughts, code snippets, study material, and ideas.</p>
+    </div>
+    <a href="{% url 'notes_app:note_create' %}" class="btn btn-primary rounded-pill px-4 fw-bold">
+        <i class="fa-solid fa-plus me-2"></i> Create New Note
+    </a>
+</div>
+
+<!-- Search & Filter Bar -->
+<div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+    <form method="GET" action="{% url 'notes_app:note_list' %}" class="row g-2 align-items-center">
+        <div class="col-12 col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-body-tertiary border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                <input type="text" name="q" class="form-control border-start-0" placeholder="Filter notes by title or keywords..." value="{{ query }}">
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-8 col-md-4">
+            <select name="category" class="form-select" onchange="this.form.submit()">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                    <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-12 col-sm-4 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100 rounded-3">Filter</button>
+            {% if query or selected_category %}
+                <a href="{% url 'notes_app:note_list' %}" class="btn btn-outline-secondary rounded-3" title="Clear Filters"><i class="fa-solid fa-xmark"></i></a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Pinned Notes Section -->
+{% if pinned_notes %}
+    <div class="mb-5">
+        <h6 class="fw-bold text-muted text-uppercase letter-spacing-1 mb-3">
+            <i class="fa-solid fa-thumbtack text-warning me-2"></i> Pinned Notes
+        </h6>
+        <div class="row g-3">
+            {% for note in pinned_notes %}
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="note-card color-{{ note.color }}">
+                        <a href="{% url 'notes_app:note_toggle_pin' note.pk %}" class="pin-badge" title="Unpin Note">
+                            <i class="fa-solid fa-thumbtack"></i>
+                        </a>
+                        <div>
+                            <span class="badge badge-custom {{ note.category|category_badge }} mb-2">{{ note.category }}</span>
+                            <a href="{% url 'notes_app:note_detail' note.pk %}" class="text-decoration-none text-reset d-block">
+                                <h5 class="note-title pe-4">{{ note.title }}</h5>
+                            </a>
+                            <div class="note-snippet">{{ note.content|default:"No content." }}</div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-3 mt-3 border-top border-subtle small text-muted">
+                            <span>Updated {{ note.updated_at|date:"M j, Y" }}</span>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-link text-secondary p-0" onclick="copyToClipboard(`{{ note.content|escapejs }}`, this)" title="Copy Content">
+                                    <i class="fa-regular fa-copy"></i>
+                                </button>
+                                <a href="{% url 'notes_app:note_edit' note.pk %}" class="text-secondary" title="Edit"><i class="fa-solid fa-pen-to-square"></i></a>
+                                <a href="{% url 'notes_app:note_delete' note.pk %}" class="text-danger" title="Delete"><i class="fa-solid fa-trash-can"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<!-- All / Other Notes Section -->
+<div>
+    {% if pinned_notes %}
+        <h6 class="fw-bold text-muted text-uppercase letter-spacing-1 mb-3">All Notes</h6>
+    {% endif %}
+
+    {% if page_obj.object_list %}
+        <div class="row g-3">
+            {% for note in page_obj.object_list %}
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="note-card color-{{ note.color }}">
+                        <a href="{% url 'notes_app:note_toggle_pin' note.pk %}" class="pin-badge opacity-50 hover-opacity-100" title="Pin Note">
+                            <i class="fa-regular fa-thumbtack"></i>
+                        </a>
+                        <div>
+                            <span class="badge badge-custom {{ note.category|category_badge }} mb-2">{{ note.category }}</span>
+                            <a href="{% url 'notes_app:note_detail' note.pk %}" class="text-decoration-none text-reset d-block">
+                                <h5 class="note-title pe-4">{{ note.title }}</h5>
+                            </a>
+                            <div class="note-snippet">{{ note.content|default:"No content." }}</div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-3 mt-3 border-top border-subtle small text-muted">
+                            <span>Updated {{ note.updated_at|date:"M j, Y" }}</span>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-link text-secondary p-0" onclick="copyToClipboard(`{{ note.content|escapejs }}`, this)" title="Copy Content">
+                                    <i class="fa-regular fa-copy"></i>
+                                </button>
+                                <a href="{% url 'notes_app:note_edit' note.pk %}" class="text-secondary" title="Edit"><i class="fa-solid fa-pen-to-square"></i></a>
+                                <a href="{% url 'notes_app:note_delete' note.pk %}" class="text-danger" title="Delete"><i class="fa-solid fa-trash-can"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination Bar -->
+        {% if page_obj.has_other_pages %}
+            <nav class="mt-4 pt-3 d-flex justify-content-center">
+                <ul class="pagination pagination-md">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}&category={{ selected_category }}">&laquo; Prev</a></li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item"><a class="page-link" href="?page={{ num }}&q={{ query }}&category={{ selected_category }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}&category={{ selected_category }}">Next &raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+    {% elif not pinned_notes %}
+        <div class="empty-state">
+            <i class="fa-solid fa-note-sticky empty-state-icon"></i>
+            <h4 class="fw-bold">No Notes Found</h4>
+            <p class="text-muted">{% if query or selected_category %}No notes matched your search criteria.{% else %}You haven't created any notes yet.{% endif %}</p>
+            <a href="{% url 'notes_app:note_create' %}" class="btn btn-primary rounded-pill px-4 fw-bold">
+                <i class="fa-solid fa-plus me-2"></i> Create First Note
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

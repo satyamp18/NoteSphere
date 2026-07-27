@@ -1,0 +1,24 @@
+{% extends 'notes_app/base.html' %}
+{% block content %}
+<h2>All Notes</h2>
+<div class="row">
+  {% for note in notes %}
+  <div class="col-md-6 mb-3">
+    <div class="card p-3">
+      <h5>{{ note.title }}</h5>
+      <small class="text-muted">{{ note.created_at }}</small>
+      <p>
+        {% if note.note_type == 'drawing' and note.drawing %}
+          <img src="{{ note.drawing.url }}" alt="drawing" class="img-fluid"/>
+        {% else %}
+          {{ note.content|linebreaksbr }}
+        {% endif %}
+      </p>
+      <a class="btn btn-sm btn-primary" href="{% url 'notes:detail' note.pk %}">Open</a>
+      <a class="btn btn-sm btn-secondary" href="{% url 'notes:edit' note.pk %}">Edit</a>
+      <a class="btn btn-sm btn-danger" href="{% url 'notes:delete' note.pk %}">Delete</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

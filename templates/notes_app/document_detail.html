@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load notes_extras %}
+{% block title %}{{ document.title }} - NoteSphere{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <a href="{% url 'notes_app:document_list' %}" class="btn btn-outline-secondary rounded-pill px-3">
+                <i class="fa-solid fa-arrow-left me-1"></i> Back to Documents
+            </a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'notes_app:document_download' document.pk %}" class="btn btn-primary rounded-pill px-4 fw-bold">
+                    <i class="fa-solid fa-download me-2"></i> Download File
+                </a>
+                <a href="{% url 'notes_app:document_edit' document.pk %}" class="btn btn-outline-secondary rounded-pill px-3">
+                    <i class="fa-solid fa-pen-to-square me-1"></i> Edit Details
+                </a>
+                <a href="{% url 'notes_app:document_delete' document.pk %}" class="btn btn-outline-danger rounded-pill px-3">
+                    <i class="fa-solid fa-trash-can"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-sm-5 text-center">
+            <div class="file-icon-box mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2.75rem;">
+                <i class="fa-solid {{ document.file_type|file_icon }}"></i>
+            </div>
+
+            <span class="badge badge-custom {{ document.category|category_badge }} mx-auto mb-2 fs-6">{{ document.category }}</span>
+            <h2 class="fw-bold mb-2">{{ document.title }}</h2>
+            <p class="text-muted mb-4">{{ document.filename }}</p>
+
+            {% if document.description %}
+                <div class="p-3 bg-body-tertiary rounded-3 text-start mb-4">
+                    <h6 class="fw-bold mb-1 text-muted">Description:</h6>
+                    <p class="mb-0 text-main" style="white-space: pre-wrap;">{{ document.description }}</p>
+                </div>
+            {% endif %}
+
+            <div class="row g-3 py-3 border-top border-bottom text-start">
+                <div class="col-6 col-sm-3">
+                    <div class="small text-muted">Format</div>
+                    <div class="fw-bold text-uppercase">{{ document.file_type }}</div>
+                </div>
+                <div class="col-6 col-sm-3">
+                    <div class="small text-muted">File Size</div>
+                    <div class="fw-bold">{{ document.file_size|filesize_format }}</div>
+                </div>
+                <div class="col-6 col-sm-3">
+                    <div class="small text-muted">Upload Date</div>
+                    <div class="fw-bold">{{ document.created_at|date:"M j, Y" }}</div>
+                </div>
+                <div class="col-6 col-sm-3">
+                    <div class="small text-muted">Owner</div>
+                    <div class="fw-bold">@{{ document.user.username }}</div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a href="{% url 'notes_app:document_download' document.pk %}" class="btn btn-lg btn-success rounded-pill px-5 fw-bold shadow-sm">
+                    <i class="fa-solid fa-cloud-arrow-down me-2"></i> Download File ({{ document.file_size|filesize_format }})
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

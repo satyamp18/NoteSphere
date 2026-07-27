@@ -1,0 +1,194 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="{% if user.is_authenticated and user.profile.dark_mode %}dark{% else %}light{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NoteSphere - Smart Notes & Document Management{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Custom Design System CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Sticky Top Navigation Bar -->
+    <nav class="navbar navbar-expand-lg sticky-navbar py-2 px-3">
+        <div class="container-fluid">
+            <!-- Mobile Toggle -->
+            <button class="btn btn-link link-body-emphasis d-lg-none me-2" type="button" id="sidebarToggleBtn" aria-label="Toggle Navigation">
+                <i class="fa-solid fa-bars-staggered fs-5"></i>
+            </button>
+
+            <!-- Brand Logo -->
+            <a class="brand-logo me-4" href="{% url 'notes_app:dashboard' %}">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-cube"></i>
+                </div>
+                <span>NoteSphere</span>
+            </a>
+
+            {% if user.is_authenticated %}
+            <!-- Universal Top Search Bar -->
+            <form class="d-none d-md-flex search-input-group me-auto" action="{% url 'notes_app:search' %}" method="GET">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="search" name="q" class="form-control" placeholder="Search notes, documents, tags..." value="{{ request.GET.q|default:'' }}" aria-label="Search">
+            </form>
+            {% endif %}
+
+            <!-- Right Navbar Actions -->
+            <div class="d-flex align-items-center gap-3 ms-auto">
+                <!-- Theme Toggle Button -->
+                <button class="btn btn-icon rounded-circle btn-light border-0" id="themeToggleBtn" type="button" title="Toggle Theme">
+                    <i class="fa-solid fa-moon text-secondary fs-5"></i>
+                </button>
+
+                {% if user.is_authenticated %}
+                <!-- Quick Create Dropdown -->
+                <div class="dropdown">
+                    <button class="btn btn-primary rounded-pill px-3 d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-plus"></i>
+                        <span class="d-none d-sm-inline font-weight-bold">New</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 mt-2">
+                        <li>
+                            <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'notes_app:note_create' %}">
+                                <i class="fa-solid fa-note-sticky text-primary"></i> New Note
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'notes_app:document_upload' %}">
+                                <i class="fa-solid fa-file-arrow-up text-success"></i> Upload Document
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- User Profile Dropdown -->
+                <div class="dropdown">
+                    <button class="btn btn-link p-0 text-decoration-none border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="rounded-circle object-fit-cover" width="38" height="38">
+                        {% else %}
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 38px; height: 38px;">
+                                {{ user.username|slice:":1"|upper }}
+                            </div>
+                        {% endif %}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 mt-2 py-2" style="min-width: 220px;">
+                        <li class="px-3 py-2 border-bottom">
+                            <div class="fw-bold text-truncate">{{ user.get_full_name|default:user.username }}</div>
+                            <div class="small text-muted text-truncate">{{ user.email }}</div>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2 mt-1 d-flex align-items-center gap-2" href="{% url 'accounts:profile' %}">
+                                <i class="fa-solid fa-user-gear text-secondary"></i> Account Profile
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'accounts:password_change' %}">
+                                <i class="fa-solid fa-key text-secondary"></i> Change Password
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item py-2 text-danger d-flex align-items-center gap-2" href="{% url 'accounts:logout' %}">
+                                <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                {% else %}
+                <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary rounded-pill px-3">Log In</a>
+                <a href="{% url 'accounts:register' %}" class="btn btn-primary rounded-pill px-3">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Application Wrapper -->
+    <div class="app-wrapper">
+        {% if user.is_authenticated %}
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar">
+            <div class="sidebar-heading">Core Workspace</div>
+            <a href="{% url 'notes_app:dashboard' %}" class="nav-link-custom {% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'dashboard_alt' %}active{% endif %}">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'notes_app:note_list' %}" class="nav-link-custom {% if 'note' in request.resolver_match.url_name and 'document' not in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fa-solid fa-book"></i>
+                <span>All Notes</span>
+            </a>
+            <a href="{% url 'notes_app:document_list' %}" class="nav-link-custom {% if 'document' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fa-solid fa-folder-open"></i>
+                <span>Documents</span>
+            </a>
+
+            <div class="sidebar-heading">Account & Settings</div>
+            <a href="{% url 'accounts:profile' %}" class="nav-link-custom {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                <i class="fa-solid fa-id-card"></i>
+                <span>Profile Settings</span>
+            </a>
+            <a href="{% url 'accounts:password_change' %}" class="nav-link-custom {% if request.resolver_match.url_name == 'password_change' %}active{% endif %}">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>Security</span>
+            </a>
+
+            <!-- Quick Storage Widget in Sidebar -->
+            <div class="mt-auto p-3 bg-body-tertiary rounded-3 border border-subtle">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="small fw-semibold text-muted">Storage Used</span>
+                    <i class="fa-solid fa-hard-drive text-primary small"></i>
+                </div>
+                <div class="small fw-bold mb-2">NoteSphere Cloud</div>
+                <a href="{% url 'notes_app:document_list' %}" class="btn btn-sm btn-outline-primary w-100 rounded-pill fs-7">Manage Files</a>
+            </div>
+        </aside>
+        {% endif %}
+
+        <!-- Main Workspace Content -->
+        <main class="main-content">
+            <!-- Django Messages / Alerts Container -->
+            {% if messages %}
+                <div class="messages-container mb-4">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm border-0 rounded-3 d-flex align-items-center" role="alert">
+                            {% if message.tags == 'success' %}
+                                <i class="fa-solid fa-circle-check fs-5 me-3 text-success"></i>
+                            {% elif message.tags == 'danger' or message.tags == 'error' %}
+                                <i class="fa-solid fa-circle-exclamation fs-5 me-3 text-danger"></i>
+                            {% elif message.tags == 'warning' %}
+                                <i class="fa-solid fa-triangle-exclamation fs-5 me-3 text-warning"></i>
+                            {% else %}
+                                <i class="fa-solid fa-circle-info fs-5 me-3 text-info"></i>
+                            {% endif %}
+                            <div>{{ message }}</div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/bootstrap.bundle.min.js"></script>
+    <!-- Custom Main JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
