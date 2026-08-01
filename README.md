@@ -1,53 +1,73 @@
 # 📝 NoteSphere – Smart Notes & Document Management System
 
-NoteSphere is a minimal, clean, and production-ready **Note & Document Management System** built with **Python, Django, Bootstrap 5, and Vanilla CSS/JS**. Inspired by modern productivity tools like Notion, Google Keep, and Microsoft OneNote.
+NoteSphere is a feature-rich, responsive, and secure **Note & Document Management System** built with **Python, Django, Bootstrap 5, and Vanilla CSS/JS**. Inspired by modern productivity tools like Notion, Google Keep, and OneNote.
 
 ---
 
 ## ✨ Features
 
-- 🎨 **Modern UI/UX**: Clean, responsive dashboard with soft pastel color themes and dark mode toggle.
-- 📌 **Notes CRUD & Pinning**: Create, view, edit, delete, and pin important notes to top.
-- 📁 **Secure Document Management**: Upload, preview, and download **PDF**, **DOC/DOCX**, and **TXT** files (with 10MB size validation).
-- 🔒 **Data Isolation & Auth**: Full authentication (Register, Login, Logout, Profile edit, Password change/reset) with strict user data isolation.
-- 🔍 **Universal Search**: Search across notes and uploaded documents instantly.
-- 📊 **Storage Metrics**: Real-time cloud storage usage counter and progress quota bar.
-- 🛡️ **Built-in Security**: CSRF protection, secure file serving, XSS prevention, and custom error pages (404, 403, 500).
+- 🎨 **Modern UI/UX**: Clean dashboard with pastel accent colors, dark mode toggle, and smooth animations.
+- 📌 **Notes Management**: Create, edit, view, delete, and pin important notes to top.
+- 📁 **Document Uploads**: Upload, preview, and download documents (**PDF**, **DOC/DOCX**, **TXT**) with 10MB file size limits and validation.
+- 🔒 **User Authentication**: Secure user registration, login, logout, profile customization, and password updates with complete user data isolation.
+- 🔍 **Universal Search**: Fast real-time search across all your saved notes and uploaded files.
+- 📊 **Storage Quota & Metrics**: Dynamic visual indicator for personal cloud storage usage.
+- 🛡️ **Built-in Security**: CSRF protection, secure media file handling, XSS prevention, and custom error pages (404, 403, 500).
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Backend**: Python 3, Django 4.2+ (ORM, Views, Forms, Messages)
-- **Database**: SQLite (Production configurable to PostgreSQL)
-- **Frontend**: HTML5, Vanilla CSS3 (Custom Design System), JavaScript, Bootstrap 5, FontAwesome 6
+- **Backend**: Python 3.10+, Django 4.2+ (ORM, Views, Forms, Signals)
+- **Database**: SQLite (Development) / Configurable to PostgreSQL
+- **Frontend**: HTML5, Custom CSS3 Design System, JavaScript, Bootstrap 5, FontAwesome 6
 - **Typography**: Google Fonts (Plus Jakarta Sans)
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start Guide
 
 ### 1. Prerequisites
-Ensure Python 3.10+ is installed on your system.
+- Python 3.10 or higher installed on your machine.
+- Git (optional, for version control).
 
-### 2. Install Dependencies
+### 2. Clone / Setup Workspace
+```bash
+cd NoteSphere
+```
+
+### 3. Create & Activate Virtual Environment (Recommended)
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# macOS / Linux
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 4. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Database Setup & Demo Data
-Run migrations and generate default demo data:
+### 5. Run Database Migrations
 ```bash
 python manage.py migrate
+```
+
+### 6. Create Demo Admin Account (Optional)
+```bash
 python create_default_admin.py
 ```
 
-### 4. Run Development Server
+### 7. Start Development Server
 ```bash
 python manage.py runserver
 ```
 
-Open `http://127.0.0.1:8000/` in your browser.
+Navigate to `http://127.0.0.1:8000/` in your web browser.
 
 ---
 
@@ -62,20 +82,18 @@ Open `http://127.0.0.1:8000/` in your browser.
 ## 📂 Project Structure
 
 ```text
-notes/
-├── accounts/               # Authentication & User Profile App
-│   ├── models.py           # Profile model & Signals
-│   ├── views.py            # Auth, Profile, Password Change & Dark Mode views
-│   └── urls.py             # Auth URL routing
-├── notes_app/              # Core Notes & Documents App
-│   ├── models.py           # Note & Document models
-│   ├── views.py            # Dashboard, Note CRUD, Document Upload/Download, Search
-│   ├── forms.py            # Note & Document forms + file size/extension validators
-│   └── templatetags/       # Custom template filters (file icons, filesize format, badges)
-├── notes_manager/          # Django Project Configuration (settings, urls, wsgi)
-├── static/                 # Custom CSS Design System & JS scripts
-├── templates/              # Base layout, auth, dashboard, note & document templates
-└── manage.py               # Django CLI utility
+NoteSphere/
+├── accounts/               # User authentication, profiles, & settings
+├── notes_app/              # Core notes, documents, & search logic
+├── notes_manager/          # Django project configuration & settings
+├── static/                 # CSS design system, JavaScript, & assets
+├── templates/              # HTML layout, dashboard, auth, & detail pages
+├── media/                  # User uploaded documents & media files
+├── .gitignore              # Git ignore configuration
+├── manage.py               # Django management script
+├── create_default_admin.py # Script to initialize demo superuser
+├── requirements.txt        # Python package dependencies
+└── README.md               # Project documentation
 ```
 
 ---

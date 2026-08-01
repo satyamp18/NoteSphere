@@ -1,0 +1,49 @@
+# Python / Django cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Database
+db.sqlite3
+db.sqlite3-journal
+*.sqlite3
+
+# User Uploaded Media Files
+media/
+drawings/
+
+# Environment & Local Settings
+.env
+.env.local
+local_settings.py
+*.log
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE & Editor Configurations
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Testing & Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Agent / AI local workspace caches
+.gemini/
+.agents/
