@@ -1,1 +1,1 @@
-web: gunicorn notesphere.wsgi
+web: gunicorn notes_manager.wsgi
