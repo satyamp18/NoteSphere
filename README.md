@@ -29,14 +29,13 @@ NoteSphere is a feature-rich, responsive, and secure **Note & Document Managemen
 
 ### 1. Prerequisites
 - Python 3.10 or higher installed on your machine.
-- Git (optional, for version control).
 
 ### 2. Clone / Setup Workspace
 ```bash
 cd NoteSphere
 ```
 
-### 3. Create & Activate Virtual Environment (Recommended)
+### 3. Create & Activate Virtual Environment
 ```bash
 # Windows
 python -m venv venv
@@ -56,13 +55,9 @@ pip install -r requirements.txt
 ```bash
 python manage.py migrate
 ```
-
-### 6. Create Demo Admin Account (Optional)
-```bash
-python create_default_admin.py
 ```
 
-### 7. Start Development Server
+### 6. Start Development Server
 ```bash
 python manage.py runserver
 ```
@@ -71,28 +66,20 @@ Navigate to `http://127.0.0.1:8000/` in your web browser.
 
 ---
 
-## 🔑 Demo Account Credentials
-
-| Role | Username | Password |
-| :--- | :--- | :--- |
-| **Demo Admin** | `admin` | `adminpass123` |
-
----
-
 ## 📂 Project Structure
 
 ```text
 NoteSphere/
-├── accounts/               # User authentication, profiles, & settings
-├── notes_app/              # Core notes, documents, & search logic
-├── notes_manager/          # Django project configuration & settings
-├── static/                 # CSS design system, JavaScript, & assets
-├── templates/              # HTML layout, dashboard, auth, & detail pages
-├── media/                  # User uploaded documents & media files
-├── .gitignore              # Git ignore configuration
-├── manage.py               # Django management script
-├── create_default_admin.py # Script to initialize demo superuser
-├── requirements.txt        # Python package dependencies
+├── accounts/              
+├── notes_app/              
+├── notes_manager/          
+├── static/                 
+├── templates/              
+├── media/                  
+├── .gitignore              
+├── manage.py               
+├── create_default_admin.py
+├── requirements.txt        
 └── README.md               # Project documentation
 ```
 
